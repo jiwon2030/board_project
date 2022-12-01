@@ -15,10 +15,6 @@ const userSchema = mongoose.Schema({
         type: String,
         minlenth: 8
     },
-    lastname: {
-        type: String,
-        maxlength: 50
-    },
     role: {
         type: Number,
         default: 0
@@ -31,6 +27,6 @@ const userSchema = mongoose.Schema({
     }
 })
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model('user', userSchema)
 
 module.exports = { User }
