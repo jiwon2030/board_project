@@ -4,6 +4,7 @@ const port = 5000 // 포트번호 5000번으로 설정
 const bodyParser = require('body-parser') // express에서 제공되는 bodyParser 모듈
 const cookieParser = require('cookie-parser') // express에서 제공되는 cookieParser 모듈
 const { User } = require("./models/user")
+const { Board } = require("./models/board")
 const { auth } = require('./middleware/auth')
 
 const config = require('./config/dev')
@@ -23,6 +24,9 @@ app.use(bodyParser.json()) // application/json으로 되어 있는 정보를 분
 app.use(cookieParser()) 
 
 app.get('/', (req, res) => res.send('Hellow World!')) // route 디렉토리에 오면 메세지 출력 
+
+
+//////////////////////////// USER ////////////////////////////
 
 // 회원가입 기능
 app.post('/api/users/register', (req, res) => {
@@ -86,5 +90,73 @@ app.get('/api/users/logout', auth, (req, res) => {
             return res.status(200).send({ success: true })
         })
 })
+
+
+
+//////////////////////////// BOARD ////////////////////////////
+
+// TO-DO > 시간 한국 기준으로 변경
+
+// 게시물 생성 기능
+// 토큰을 가져와서 users 테이블의 _id를 찾아서 저장해줘야 함
+// @json : title, content
+app.post('/api/boards', (req, res) => {
+
+    // 이곳에서 뭔가 작업을 해줘야 하거나 미들웨어를 둬야 함
+
+    User.findOne({ _id: "토큰을 통해 찾은 _id가 들어가야 함", isDeleted: false }, (err, user) => {
+        if (!user) {
+          return res.status(400).json({
+            success: false,
+            message: " 제공된 _id에 해당하는 user가 없습니다.",
+          });
+        }
+
+        const board = new Board(req.body)
+
+        board.save((err, boardInfo) => {
+            if(err) return res.json({ success: false, err})
+            // 성공했다는 정보를 json형식으로 전달
+            return res.status(200).json({
+                success: true
+            })
+        })
+    })
+})
+
+// 게시물 전체 조회
+app.get("/api/boards", async (req, res) => {
+    const list = await Board.find({ isDeleted: false }).populate('userId');
+
+    res.status(200).send({ boards: list });
+});
+
+// 게시물 상세페이지 조회 > 특정 게시물 ID로 조회
+app.get("/api/boards/:id", async (req, res) => {
+    const board = await Board.findOne({ _id: req.params.id, isDeleted: false }).populate("userId");
+
+    return res.status(200).send({ board: board});
+});
+
+// 게시물 수정 > 특정 게시물 ID로 수정
+app.patch("/api/boards/:id", (req, res) => {
+    Board.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, { title: req.body.title, content: req.body.content, updatedAt: new Date() }, (err, board) => {
+        if (err) return res.status(400).json({ success: false, err });
+        return res.status(200).send({
+            success: true,
+        });
+    });
+});
+
+// 게시물 삭제 > 특정 게시물 ID로 삭제
+app.delete("/api/boards/:id", (req, res) => {
+    Board.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, { isDeleted: true, updatedAt: new Date() }, (err, board) => {
+        if (err) return res.status(400).json({ success: false, err });
+        return res.status(200).send({
+            success: true,
+        });
+    });
+});
+  
 
 app.listen(port, () => console.log(`listening on port ${port}`))

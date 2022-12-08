@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt') // bcrypt 모듈 가져오기
 const saltRounds = 15
 const jwt = require('jsonwebtoken')
 
+// TO-DO > 시간 한국 기준으로 변경
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -27,7 +29,20 @@ const userSchema = mongoose.Schema({
     },
     tokenExp: {
         type: Number
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now, // 여기 수정
+        required: true,
+    },
+    updatedAt : {
+        type: Date
+    },
+    isDeleted : {
+        type: Boolean,
+        default: false,
+        required: true,
+    },
 })
 
 userSchema.pre('save', function( next ){
