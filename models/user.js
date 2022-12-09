@@ -62,14 +62,12 @@ userSchema.pre('save', function( next ){
     } else {
         next() // password 외에 다른 정보를 수정할 때에는 index.js에 있는 user.save 실행
     }
-
-    
 })
 
-userSchema.methods.comparePssword = function(plainPassword, cb) {
+userSchema.methods.comparePassword = function(plainPassword, cb) {
     // 입력한 비밀번호를 암호화하여 기존의 암호화된 데이터베이스에 있는 비밀번호와 비교한다.
     bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
-        if(err) return cb(err),
+        if(err) return cb(err)
         cb(null, isMatch)
     })
 }
@@ -94,7 +92,7 @@ userSchema.statics.findByToken = function(token, cb) {
     // token을 decode한다.
     jwt.verify(token, 'secretToken', function(err, decoded) {
         // 사용자 아이디를 이용해서 사용자를 찾은 다음에 client에서 가져온 token과 DB에 보관된 token이 일치하는지 확인
-        user.findOne({"_id": decoded, "token": token}, function(err, user) {
+        user.findOne({"_id": decoded, "token": token, "isDeleted": false}, function(err, user) {
             if(err) return cb(err)
             cb(null, user)
         })

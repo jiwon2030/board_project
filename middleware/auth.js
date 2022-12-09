@@ -11,7 +11,7 @@ let auth = (req, res, next) => {
     User.findByToken(token, (err, user) => {
         // 사용자가 없다면 에러 메시지 출력
         if(err) throw err
-        if(!user) return res.js({ isAuth: false, error: true })
+        if(!user) return res.json({ isAuth: false, error: true })
 
         //사용자가 있다면 token과 user를 req에 저장하고 index.js로 이동
         req.token = token

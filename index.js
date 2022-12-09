@@ -45,7 +45,7 @@ app.post('/api/users/register', (req, res) => {
 // 로그인 기능
 app.post('/api/users/login', (req, res) => {
     // 요청된 아이디를 데이터베이스에서 있는지 찾는다.
-    User.findOne({ id: req.body.id }, (err, user) => {
+    User.findOne({ id: req.body.id, isDeleted: false }, (err, user) => {
         if(!user) {
             return res.json({
                 loginSuccess: false,
@@ -56,15 +56,13 @@ app.post('/api/users/login', (req, res) => {
         user.comparePassword(req.body.password, (err, isMatch) => {
             if(!isMatch)
             return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다. 다시 입력해주세요" })
-
             // 비밀번호까지 일치한다면 토큰을 생성한다.
             user.generateToken((err, user) => {
                 if(err) return res.status(400).send(err) // error가 있다는 것을 client에 전달해준다.
-                
                 // 토큰을 쿠키에 저장한다.
-                res.cookie("x_auth", user.token)
-                .status(200)
-                .json({ loginSuccess:true, userId: user._id }) 
+                return res.cookie("x_auth", user.token)
+                    .status(200)
+                    .json({ loginSuccess:true, userId: user._id }) 
 
             })
         })
@@ -98,13 +96,10 @@ app.get('/api/users/logout', auth, (req, res) => {
 // TO-DO > 시간 한국 기준으로 변경
 
 // 게시물 생성 기능
-// 토큰을 가져와서 users 테이블의 _id를 찾아서 저장해줘야 함
+// 로그인 시 생성한 토큰을 쿠키에서 가져온 후 게시물 생성 > 게시물 작성하려면 로그인 필수
 // @json : title, content
-app.post('/api/boards', (req, res) => {
-
-    // 이곳에서 뭔가 작업을 해줘야 하거나 미들웨어를 둬야 함
-
-    User.findOne({ _id: "토큰을 통해 찾은 _id가 들어가야 함", isDeleted: false }, (err, user) => {
+app.post('/api/boards', auth, (req, res) => {
+    User.findOne({ _id: req.user._id, isDeleted: false }, (err, user) => {
         if (!user) {
           return res.status(400).json({
             success: false,
@@ -113,6 +108,7 @@ app.post('/api/boards', (req, res) => {
         }
 
         const board = new Board(req.body)
+        board.userId = user._id
 
         board.save((err, boardInfo) => {
             if(err) return res.json({ success: false, err})
@@ -139,19 +135,24 @@ app.get("/api/boards/:id", async (req, res) => {
 });
 
 // 게시물 수정 > 특정 게시물 ID로 수정
-app.patch("/api/boards/:id", (req, res) => {
-    Board.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, { title: req.body.title, content: req.body.content, updatedAt: new Date() }, (err, board) => {
+// 게시물 업로드한 본인만 수정 가능 > 로그인 해야함
+// @json : title, content
+app.patch("/api/boards/:id", auth, (req, res) => {
+    Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { title: req.body.title, content: req.body.content, updatedAt: new Date() }, (err, board) => {
         if (err) return res.status(400).json({ success: false, err });
+        if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
         return res.status(200).send({
             success: true,
         });
     });
-});
+})
 
 // 게시물 삭제 > 특정 게시물 ID로 삭제
-app.delete("/api/boards/:id", (req, res) => {
-    Board.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, { isDeleted: true, updatedAt: new Date() }, (err, board) => {
+// 게시물 업로드한 본인만 삭제 가능 > 로그인 해야함
+app.delete("/api/boards/:id", auth, (req, res) => {
+    Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { isDeleted: true, updatedAt: new Date() }, (err, board) => {
         if (err) return res.status(400).json({ success: false, err });
+        if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
         return res.status(200).send({
             success: true,
         });
