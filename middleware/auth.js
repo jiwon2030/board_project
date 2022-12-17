@@ -13,7 +13,7 @@ let auth = (req, res, next) => {
         if(err) throw err
         if(!user) return res.json({ isAuth: false, error: true })
 
-        //사용자가 있다면 token과 user를 req에 저장하고 index.js로 이동
+        //사용자가 있다면 token과 user를 req에 저장하고 main.js로 이동
         req.token = token
         req.user = user
         next()

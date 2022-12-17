@@ -10,7 +10,6 @@ const { auth } = require('./middleware/auth')
 const config = require('./config/dev')
 
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
-const e = require('express')
 // App에 MongoDB 연결하기
 mongoose.connect(config.mongoURI, {
     useNewUrlParser: true, useUnifiedTopology: true
@@ -23,7 +22,12 @@ app.use(bodyParser.urlencoded({extended: true})) // application/x-www-form-urlen
 app.use(bodyParser.json()) // application/json으로 되어 있는 정보를 분석
 app.use(cookieParser()) 
 
-app.get('/', (req, res) => res.send('Hellow World!')) // route 디렉토리에 오면 메세지 출력 
+app.get('/', async (req, res) => {
+    const boards = await Board.find({
+        order: [['day', 'DESC']]
+    })
+    res.render('./views/board/board.js', { boards: boards });
+})
 
 
 //////////////////////////// USER ////////////////////////////
@@ -89,11 +93,7 @@ app.get('/api/users/logout', auth, (req, res) => {
         })
 })
 
-
-
-//////////////////////////// BOARD ////////////////////////////
-
-// TO-DO > 시간 한국 기준으로 변경
+////////////////////// BOARD //////////////////////
 
 // 게시물 생성 기능
 // 로그인 시 생성한 토큰을 쿠키에서 가져온 후 게시물 생성 > 게시물 작성하려면 로그인 필수
@@ -158,6 +158,5 @@ app.delete("/api/boards/:id", auth, (req, res) => {
         });
     });
 });
-  
 
 app.listen(port, () => console.log(`listening on port ${port}`))
