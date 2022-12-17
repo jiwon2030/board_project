@@ -16,7 +16,6 @@ mongoose.connect(config.mongoURI, {
 }).then(() => console.log('MongoDB Connected!'))
   .catch(err => console.log(err)) 
 
-
 app.use(bodyParser.urlencoded({extended: true})) // application/x-www-form-urlencoded 형식으로 되어 있는 정보를 분석
 
 app.use(bodyParser.json()) // application/json으로 되어 있는 정보를 분석
