@@ -1,6 +1,6 @@
 const express = require('express') // express 모듈 가져오기
 const app = express()
-const port = 5000 // 포트번호 5000번으로 설정
+const port = 8000 // 포트번호 8000번으로 설정
 const bodyParser = require('body-parser') // express에서 제공되는 bodyParser 모듈
 const cookieParser = require('cookie-parser') // express에서 제공되는 cookieParser 모듈
 const { User } = require("./models/user")
@@ -24,7 +24,7 @@ app.use(cookieParser())
 
 app.get('/', async (req, res) => {
     const boards = await Board.find({
-        order: [['day', 'DESC']]
+        order: [['day', 'DESC']]   
     })
     res.render('./views/board/board.js', { boards: boards });
 })

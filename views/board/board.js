@@ -1,5 +1,4 @@
 const express = require('express');
-//const { Account, Board, Comment } = require('../../models')
 const { User } = require("./models/user")
 const { Board } = require("./models/board")
 const { auth } = require('./middleware/auth')
