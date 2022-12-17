@@ -1,0 +1,74 @@
+<%- include ('../include/header') -%>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">제목</span>
+        <input type="text" id='title' class="form-control" placeholder="제목을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1" value="<%= boardRead['title'] %>">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">내용</span>
+        <input type="text" id='contents' class="form-control" placeholder="내용을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1" value="<%= boardRead['contents'] %>">
+    </div>
+
+    <button type="button" id="updateButton" class="btn btn-primary">수정하기</button>
+    <button type="button" id="deleteButton" class="btn btn-danger">삭제하기</button>
+
+    <%- include ('../include/modal') -%>
+
+
+
+        <script>
+            const queryString = window.location.search;
+            const urlParam = new URLSearchParams(queryString);
+            const boardId = urlParam.get('boardId');
+            let nowButton = "";
+            document.getElementById("updateButton").onclick = function (event) {
+                nowButton = event.target.id;
+                updateOrDelete();
+            }
+            document.getElementById("deleteButton").onclick = function (event) {
+                nowButton = event.target.id;
+                updateOrDelete();
+            }
+            // 모달에서 확인 버튼을 누르면 함수 실행
+            function updateOrDelete() {
+                var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
+                let title = document.getElementById('title').value;
+                let contents = document.getElementById('contents').value;
+                const data = {
+                    boardId: boardId,
+                    title: title,
+                    contents: contents,
+                    nowButton: nowButton
+                }
+                const url = '/api/updateBoard';
+                const init = {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                };
+                fetch(url, init)
+                    .then((res) => res.json())
+                    .then(res => {
+                        responseTxt = res
+                        if (res.status == 200 || res.status == 201) {
+                            if (responseTxt['sucess'] == true) {
+                                const modalTitle = document.querySelector('#msgTitle');
+                                var mtTxt = document.createTextNode(responseTxt['modal_title']);
+                                modalTitle.appendChild(mtTxt);
+                                const modalBody = document.querySelector('#msgbody');
+                                var mbTxt = document.createTextNode(responseTxt['modal_body']);
+                                modalBody.appendChild(mbTxt);
+                                myModal.show();
+                            }
+                        }
+                    })
+            }
+        </script>
+
+
+        <%- include ('../include/footer') -%>

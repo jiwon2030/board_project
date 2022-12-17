@@ -1,0 +1,62 @@
+<%- include ('../include/header') -%>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">name</th>
+                <th scope="col">Day</th>
+            </tr>
+        </thead>
+        <tbody id="boardMaster">
+            <% for (var i=0; i < boards.length; i++) { %>
+                <tr>
+                    <th scope="row">
+                        <%= i + 1 %>
+                    </th>
+                    <td>
+                        <a href="/boardRead/?boardId=<%= boards[i]['boardId'] %>">
+                            <%= boards[i]['title'] %>
+                        </a>
+                    </td>
+                    <td>
+                        <%= boards[i]['name'] %>
+                    </td>
+                    <td>
+                        <%= boards[i]['day'].getFullYear() + '-' + parseInt(boards[i]['day'].getMonth() + 1) + '-' +
+                            boards[i]['day'].getDate() %>
+                    </td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-info" onclick="move_boardCreate()">글쓰기</button>
+
+    <%- include ('../include/modal') -%>
+
+        <script>
+            // 글쓰기
+            function move_boardCreate() {
+                var myLoginModal = new bootstrap.Modal(document.getElementById("loginModal"), {});
+                const url = '/auth/boardCreate';
+                const init = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'authorization': 'Bearer ' + localStorage.getItem("token"),
+                    },
+                    credentials: 'same-origin'
+                };
+                fetch(url, init)
+                    .then((res) => res.json())
+                    .then(res => {
+                        if (res.status == 200 || res.status == 201) {
+                            return location.href = '/boardCreate';
+                        } else {
+                            myLoginModal.show();
+                        }
+                    })
+            }
+        </script>
+        <%- include ('../include/footer') -%>
