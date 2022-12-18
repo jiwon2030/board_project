@@ -23,5 +23,3 @@ let auth = (req, res, next) => {
 
     // 사용자가 없으면 인증 실패
 }
-
-module.exports = { auth }

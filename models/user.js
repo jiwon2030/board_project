@@ -43,11 +43,6 @@ const userSchema = mongoose.Schema({
     },
 })
 
-exports.getCurrentDate = function () {
-    return new Date().getTime();
-    var CurrentTime = this;
-  };
-
 userSchema.pre('save', function( next ){
     var user = this;
 

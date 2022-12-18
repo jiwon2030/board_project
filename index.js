@@ -58,15 +58,20 @@ app.post('/api/users/login', (req, res) => {
                 message: "존재하지 않은 아이디입니다."
             })
         }
+
+        console.log("compare 들어가기 전");
+
         // 요청된 아이디가 데이터 베이스에 있다면 비밀번호가 맞는 비밀번호인지 확인한다.
         user.comparePassword(req.body.password, (err, isMatch) => {
+            if(err) return res.status(400).send(err);
             if(!isMatch)
             return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다. 다시 입력해주세요" })
+            
             // 비밀번호까지 일치한다면 토큰을 생성한다.
             user.generateToken((err, user) => {
                 if(err) return res.status(400).send(err) // error가 있다는 것을 client에 전달해준다.
                 // 토큰을 쿠키에 저장한다.
-                return res.cookie("x_auth", user.token)
+                res.cookie("x_auth", user.token)
                     .status(200)
                     .json({ loginSuccess:true, userId: user._id }) 
 

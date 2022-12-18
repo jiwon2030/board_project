@@ -4,68 +4,181 @@ const { Board } = require("./models/board")
 const { auth } = require('./middleware/auth')
 const router = express.Router();
 
-// 게시물 생성 기능
-// 로그인 시 생성한 토큰을 쿠키에서 가져온 후 게시물 생성 > 게시물 작성하려면 로그인 필수
-// @json : title, content
-app.post('/api/boards', auth, (req, res) => {
-    User.findOne({ _id: req.user._id, isDeleted: false }, (err, user) => {
-        if (!user) {
-          return res.status(400).json({
-            success: false,
-            message: " 제공된 _id에 해당하는 user가 없습니다.",
-          });
+// 게시글 작성
+router.post('/boardCreate', auth, async (req, res) => {
+    try {
+        const { title, contents } = req.body;
+        const { user } = res.locals;
+        const name = user['dataValues']['name'];
+
+        let boardId = await Board.findAll({
+            order: [['boardId', 'DESC']],
+            limit: 1
+        });
+
+        if (boardId.length == 0) {
+            boardId = 1
+        } else {
+            boardId = boardId[0]['boardId'] + 1;
         }
 
-        const board = new Board(req.body)
-        board.userId = user._id
+        const today = new Date();
+        const utc = today.getTime() + (today.getTimezoneOffset() * 60 * 1000);
+        const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
 
-        board.save((err, boardInfo) => {
-            if(err) return res.json({ success: false, err})
-            // 성공했다는 정보를 json형식으로 전달
-            return res.status(200).json({
-                success: true
-            })
-        })
-    })
+        const kr_today = new Date(utc + KR_TIME_DIFF + 32400000);
+        const day = kr_today;
+
+        await Board.create({ boardId, name, title, contents, day });
+
+        res.status(200).send({
+            result: "success",
+            status: 200,
+            modal_title: "저장 성공",
+            modal_body: "글이 성공적으로 저장 되었습니다."
+        });
+    } catch (err) {
+        res.status(400).send({
+            result: "fail",
+            status: 400,
+            modal_title: "저장 실패",
+            modal_body: "내용 확인 후, 다시 작성해주세요."
+        });
+    }
 })
 
-// 게시물 전체 조회
-app.get("/api/boards", async (req, res) => {
-    const list = await Board.find({ isDeleted: false }).populate('userId');
+// readBoard에서 수정하기 혹은 삭제하기 
+router.post('/chkPW', auth, async (req, res) => {
+    try {
+        const { boardId, passWord, nowButton } = req.body;
+        const { user } = res.locals;
+        const name = user['dataValues']['name'];
 
-    res.status(200).send({ boards: list });
-});
+        User.hasMany(Board, { foreignKey: 'name' });
+        Board.belongsTo(User, { foreignKey: 'name' });
 
-// 게시물 상세페이지 조회 > 특정 게시물 ID로 조회
-app.get("/api/boards/:id", async (req, res) => {
-    const board = await Board.findOne({ _id: req.params.id, isDeleted: false }).populate("userId");
-
-    return res.status(200).send({ board: board });
-});
-
-// 게시물 수정 > 특정 게시물 ID로 수정
-// 게시물 업로드한 본인만 수정 가능 > 로그인 해야함
-// @json : title, content
-app.patch("/api/boards/:id", auth, (req, res) => {
-    Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { title: req.body.title, content: req.body.content, updatedAt: new Date() }, (err, board) => {
-        if (err) return res.status(400).json({ success: false, err });
-        if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
-        return res.status(200).send({
-            success: true,
+        const findIdPw = await Board.findOne({
+            include: [
+                {
+                    model: User,
+                    required: true,
+                    where: {
+                        _id, passWord
+                    }
+                }
+            ],
+            where: {
+                boardId
+            }
         });
-    });
+
+
+        if (findIdPw != null) {
+            if (nowButton == 'updateButton') {
+                res.status(200).send({
+                    result: "success",
+                    status: 200
+                });
+            } else {
+
+                await Comment.destroy({
+                    where: {
+                        boardId
+                    }
+                });
+
+                await Board.destroy({
+                    where: {
+                        boardId
+                    }
+                });
+
+                res.status(200).send({
+                    result: "success",
+                    status: 200,
+                    modal_title: "삭제 성공",
+                    modal_body: "글이 성공적으로 삭제 되었습니다."
+                });
+            }
+        } else {
+            res.status(400).send({
+                result: "fail",
+                status: 400,
+                modal_title: "확인 필요",
+                modal_body: "비밀번호를 확인해주세요."
+            });
+        }
+    } catch (err) {
+        res.status(400).send({
+            result: "fail",
+            status: 400,
+            modal_title: "확인 필요",
+            modal_body: "비밀번호를 확인해주세요."
+        });
+    }
 })
 
-// 게시물 삭제 > 특정 게시물 ID로 삭제
-// 게시물 업로드한 본인만 삭제 가능 > 로그인 해야함
-app.delete("/api/boards/:id", auth, (req, res) => {
-    Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { isDeleted: true, updatedAt: new Date() }, (err, board) => {
-        if (err) return res.status(400).json({ success: false, err });
-        if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
-        return res.status(200).send({
-            success: true,
+// boardUpdate에서 수정하기 혹은 삭제하기 
+router.post('/boardUpdate', async (req, res) => {
+    try {
+        const { boardId, title, contents, nowButton } = req.body;
+        const findIdPw = await Board.findOne({
+            where: {
+                boardId
+            }
         });
-    });
-});
+
+
+        if (findIdPw != null) {
+            if (nowButton == 'updateButton') {
+                await Board.update(
+                    {
+                        title: title,
+                        contents: contents
+                    },
+                    {
+                        where: {
+                            boardId
+                        }
+                    },
+                );
+
+                res.status(200).send({
+                    result: "success",
+                    status: 200,
+                    modal_title: "수정 성공",
+                    modal_body: "글이 성공적으로 수정 되었습니다."
+                });
+
+            } else {
+                await Comment.destroy({
+                    where: {
+                        boardId
+                    }
+                });
+
+                await Board.destroy({
+                    where: {
+                        boardId
+                    }
+                });
+
+                res.status(200).send({
+                    result: "success",
+                    status: 200,
+                    modal_title: "삭제 성공",
+                    modal_body: "글이 성공적으로 삭제 되었습니다."
+                });
+            }
+        }
+    } catch (err) {
+        res.status(400).send({
+            result: "fail",
+            status: 400,
+            modal_title: "삭제 실패",
+            modal_body: "제목 혹은 내용을 확인해주세요."
+        });
+    }
+})
 
 module.exports = router;

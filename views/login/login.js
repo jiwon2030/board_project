@@ -1,5 +1,8 @@
 "use strict";
 
+const { User } = require("./models/user")
+const { auth } = require('./middleware/auth')
+
 const id = document.querySelector("#id"), 
     password = document.querySelector("#password"),
     loginButton = document.querySelector("button");
