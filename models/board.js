@@ -1,7 +1,5 @@
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
 
-// TO-DO > 시간 한국 기준으로 변경
-
 const boardSchema = mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +16,7 @@ const boardSchema = mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now, // 여기 수정
+        default: Date.now,
         required: true,
     },
     updatedAt : {

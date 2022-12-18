@@ -9,22 +9,22 @@
             </tr>
         </thead>
         <tbody id="boardMaster">
-            <% for (var i=0; i < boards.length; i++) { %>
+            <% for (var i=0; i < board.length; i++) { %>
                 <tr>
                     <th scope="row">
                         <%= i + 1 %>
                     </th>
                     <td>
-                        <a href="/boardRead/?boardId=<%= boards[i]['boardId'] %>">
-                            <%= boards[i]['title'] %>
+                        <a href="/boardRead/?boardId=<%= board[i]['boardId'] %>">
+                            <%= board[i]['title'] %>
                         </a>
                     </td>
                     <td>
-                        <%= boards[i]['name'] %>
+                        <%= board[i]['name'] %>
                     </td>
                     <td>
-                        <%= boards[i]['day'].getFullYear() + '-' + parseInt(boards[i]['day'].getMonth() + 1) + '-' +
-                            boards[i]['day'].getDate() %>
+                        <%= board[i]['day'].getFullYear() + '-' + parseInt(board[i]['day'].getMonth() + 1) + '-' +
+                            board[i]['day'].getDate() %>
                     </td>
                 </tr>
                 <% } %>

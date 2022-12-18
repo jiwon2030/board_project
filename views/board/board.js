@@ -10,10 +10,9 @@ const router = express.Router();
 app.post('/api/boards', auth, (req, res) => {
     User.findOne({ _id: req.user._id, isDeleted: false }, (err, user) => {
         if (!user) {
-          return res.status(400).send({
+          return res.status(400).json({
             success: false,
-            modal_title: "저장 실패",
-            modal_body: " 제공된 _id에 해당하는 user가 없습니다.",
+            message: " 제공된 _id에 해당하는 user가 없습니다.",
           });
         }
 
@@ -22,10 +21,9 @@ app.post('/api/boards', auth, (req, res) => {
 
         board.save((err, boardInfo) => {
             if(err) return res.json({ success: false, err})
-            return res.status(200).send({
-                success: true,
-                modal_title: "저장 성공",
-                modal_body: "글이 저장되었습니다.",
+            // 성공했다는 정보를 json형식으로 전달
+            return res.status(200).json({
+                success: true
             })
         })
     })
@@ -42,7 +40,7 @@ app.get("/api/boards", async (req, res) => {
 app.get("/api/boards/:id", async (req, res) => {
     const board = await Board.findOne({ _id: req.params.id, isDeleted: false }).populate("userId");
 
-    return res.status(200).send({ board: board});
+    return res.status(200).send({ board: board });
 });
 
 // 게시물 수정 > 특정 게시물 ID로 수정
@@ -54,8 +52,6 @@ app.patch("/api/boards/:id", auth, (req, res) => {
         if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
         return res.status(200).send({
             success: true,
-            modal_title: "수정 성공",
-            modal_body: "글이 수정되었습니다.",
         });
     });
 })
@@ -64,20 +60,10 @@ app.patch("/api/boards/:id", auth, (req, res) => {
 // 게시물 업로드한 본인만 삭제 가능 > 로그인 해야함
 app.delete("/api/boards/:id", auth, (req, res) => {
     Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { isDeleted: true, updatedAt: new Date() }, (err, board) => {
-        if (err) return res.status(400).send({ 
-            success: false, err,
-            modal_title: "삭제 실패",
-            modal_body: "제목 혹은 내용을 확인해주세요.", 
-        });
-        if (board == null) return res.status(404).send({ 
-            success: false, 
-            modal_title: "삭제 실패",
-            modal_body: "제목 혹은 내용을 확인해주세요."
-        });
+        if (err) return res.status(400).json({ success: false, err });
+        if (board == null) return res.status(404).json({ success: false, message: "can't find board" });
         return res.status(200).send({
             success: true,
-            modal_title: "삭제 성공",
-            modal_body: "글이 삭제되었습니다.",
         });
     });
 });

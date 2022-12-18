@@ -3,8 +3,6 @@ const bcrypt = require('bcrypt') // bcrypt 모듈 가져오기
 const saltRounds = 15
 const jwt = require('jsonwebtoken')
 
-// TO-DO > 시간 한국 기준으로 변경
-
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -32,7 +30,7 @@ const userSchema = mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now, // 여기 수정
+        default: Date.now,
         required: true,
     },
     updatedAt : {
@@ -44,6 +42,11 @@ const userSchema = mongoose.Schema({
         required: true,
     },
 })
+
+exports.getCurrentDate = function () {
+    return new Date().getTime();
+    var CurrentTime = this;
+  };
 
 userSchema.pre('save', function( next ){
     var user = this;
@@ -77,9 +80,9 @@ userSchema.methods.generateToken = function(cb) {
     // jsonwebtoken을 이용하여 token을 생성해준다.
     var token = jwt.sign(user._id.toHexString(), 'secretToken')
 
-    //user._id + 'secret' = token
-
     user.token = token
+    user.final_login_date = CurrentTime.getCurrentDate();
+
     user.save(function(err, user) {
         if(err) return cb(err)
         cb(null, user)

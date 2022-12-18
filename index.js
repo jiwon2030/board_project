@@ -9,6 +9,9 @@ const { auth } = require('./middleware/auth')
 
 const config = require('./config/dev')
 
+app.set('view engine','ejs');
+app.set('views', './views/board');
+
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
 // App에 MongoDB 연결하기
 mongoose.connect(config.mongoURI, {
@@ -22,10 +25,10 @@ app.use(bodyParser.json()) // application/json으로 되어 있는 정보를 분
 app.use(cookieParser()) 
 
 app.get('/', async (req, res) => {
-    const boards = await Board.find({
+    const board = await Board.find({
         order: [['day', 'DESC']]   
     })
-    res.render('./views/board/board.js', { boards: boards });
+    res.render('./board', { board: board });
 })
 
 
@@ -130,7 +133,7 @@ app.get("/api/boards", async (req, res) => {
 app.get("/api/boards/:id", async (req, res) => {
     const board = await Board.findOne({ _id: req.params.id, isDeleted: false }).populate("userId");
 
-    return res.status(200).send({ board: board});
+    return res.status(200).send({ board: board });
 });
 
 // 게시물 수정 > 특정 게시물 ID로 수정
