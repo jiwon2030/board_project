@@ -45,11 +45,11 @@ app.get('/', async (req, res) => {
 // 회원가입 기능
 // 수정된부분 by uijin
 app.get('/signUp', (req, res) => {
-    res.render('../acount/signUP'); //경로수정으로 회원가입 페이지 접근 해결
+    res.render('../account/signUP'); //경로수정으로 회원가입 페이지 접근 해결
 })
 ////////////////////////////////////
 
-app.post('/api/users/register', (req, res) => {
+app.post('/api/users/signUP', (req, res) => {
     // 회원가입할 때 필요한 정보들을 client에서 가져오면 데이터 베이스에 넣어준다.
     const user = new User(req.body) // req.body에 id나 password같은 정보가 들어간다.
 
