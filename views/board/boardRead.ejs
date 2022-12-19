@@ -68,14 +68,6 @@
             function delButtonSet() {
                 nowButton = 'deleteButton';
             }
-            function updCommentSet(id) {
-                reWriteId = id;
-                nowButton = 'updComment';
-            }
-            function delCommentSet(id) {
-                reWriteId = id;
-                nowButton = 'delComment';
-            }
             // 비밀번호 입력 모달 열기
             function chk_modal() {
                 var myChkModal = new bootstrap.Modal(document.getElementById("chkPassword"), {});
@@ -127,14 +119,11 @@
                             }
                         })
                 } else {
-                    let commentId = document.getElementById('commentId' + reWriteId).innerText.replace(/\s/gi, "");
                     const data = {
-                        commentId: commentId,
                         boardId: boardId,
                         passWord: inputPW,
                         nowButton: nowButton
                     }
-                    const url = '/api/chkCommentPW';
                     const init = {
                         method: 'POST',
                         body: JSON.stringify(data),
@@ -146,36 +135,7 @@
                     };
                     fetch(url, init)
                         .then((res) => res.json())
-                        .then(res => {
-                            responseTxt = res;
-                            if (res.status == 200 || res.status == 201) {
-                                if (responseTxt['result'] == 'success' && nowButton == 'updComment') {
-                                    closeOneModal('chkPassword');
-                                    let reWrite = document.getElementById('reWrite' + reWriteId);
-                                    let reWriteTxt = document.getElementById('reWrite' + reWriteId).innerText;
-                                    reWrite.removeChild(reWrite.childNodes[0]);
-                                    var input1 = document.createElement('input');
-                                    input1.setAttribute('type', 'text');
-                                    input1.setAttribute('id', 'reComment' + reWriteId);
-                                    input1.setAttribute('class', 'form-control');
-                                    input1.setAttribute('aria-describedby', 'button-addon2');
-                                    input1.setAttribute('value', reWriteTxt);
-                                    reWrite.appendChild(input1)
-                                } else if (responseTxt['result'] == 'success' && nowButton == 'delComment') {
-                                    document.getElementById("delYes").setAttribute("onClick", "delCom(reWriteId)");
-                                    closeOneModal('chkPassword');
-                                    myDelModal.show();
-                                } else {
-                                    myWrongModal.show();
-                                }
-                            } else {
-                                if (responseTxt['modal_title'] == '로그인 필요') {
-                                    myLoginModal.show();
-                                } else {
-                                    myChkCmIdPwModal.show();
-                                }
-                            }
-                        })
+                        .then(res => { responseTxt = res; })
                 }
             }
             

@@ -59,13 +59,11 @@ app.post('/api/users/login', (req, res) => {
             })
         }
 
-        console.log("compare 들어가기 전");
-
         // 요청된 아이디가 데이터 베이스에 있다면 비밀번호가 맞는 비밀번호인지 확인한다.
         user.comparePassword(req.body.password, (err, isMatch) => {
             if(err) return res.status(400).send(err);
             if(!isMatch)
-            return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다. 다시 입력해주세요" })
+                return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다. 다시 입력해주세요" })
             
             // 비밀번호까지 일치한다면 토큰을 생성한다.
             user.generateToken((err, user) => {
@@ -73,7 +71,7 @@ app.post('/api/users/login', (req, res) => {
                 // 토큰을 쿠키에 저장한다.
                 res.cookie("x_auth", user.token)
                     .status(200)
-                    .json({ loginSuccess:true, userId: user._id }) 
+                    .json({ loginSuccess: true, userId: user._id }) 
 
             })
         })
@@ -84,7 +82,7 @@ app.get('/api/users/auth', auth, (req, res) => {
     // Authentication이 True로 미들웨어를 통과해 왔다는 뜻.
     res.status(200).json({
         _id: req.user._id,
-        isAdmin: req.user.role == 0 ? false : true, // role이 0 -> 일반 사용자, 0이 아니면 관리자
+        isAdmin: req.user.role === 0 ? false : true, // role이 0 -> 일반 사용자, 1 -> 관리자
         isAuth: true,
         id: req.user.id,
         name: req.user.name,
