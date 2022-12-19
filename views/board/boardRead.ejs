@@ -2,22 +2,22 @@
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">제목</span>
         <input type="text" id='title' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly value="<%= boardRead['title'] %>">
+            readonly value="<%= readBoard['title'] %>">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">작성자명</span>
         <input type="text" id='name' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly value="<%= boardRead['name'] %>">
+            readonly value="<%= readBoard['name'] %>">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">작성날짜</span>
         <input type="text" id='day' class="form-control" aria-label="Username" aria-describedby="basic-addon1" readonly
-            value="<%= boardRead['day'].getFullYear() + '-' + parseInt(boardRead['day'].getMonth() + 1) + '-' + boardRead['day'].getDate() %>">
+            value="<%= readBoard['day'].getFullYear() + '-' + parseInt(readBoard['day'].getMonth() + 1) + '-' + readBoard['day'].getDate() %>">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">내용</span>
         <input type="text" id='contents' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly value="<%= boardRead['contents'] %>">
+            readonly value="<%= readBoard['contents'] %>">
     </div>
 
     <div id="readDiv">

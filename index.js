@@ -9,8 +9,10 @@ const { auth } = require('./middleware/auth')
 
 const config = require('./config/dev')
 
+//app.set('views', __dirname + '/views');
 app.set('view engine','ejs');
 app.set('views', './views/board');
+
 
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
 // App에 MongoDB 연결하기
@@ -35,6 +37,12 @@ app.get('/', async (req, res) => {
 //////////////////////////// USER ////////////////////////////
 
 // 회원가입 기능
+// 수정된부분 by uijin
+app.get('/signUp', (req, res) => {
+    res.render('./account/signUP');
+})
+////////////////////////////////////
+
 app.post('/api/users/register', (req, res) => {
     // 회원가입할 때 필요한 정보들을 client에서 가져오면 데이터 베이스에 넣어준다.
     const user = new User(req.body) // req.body에 id나 password같은 정보가 들어간다.
@@ -49,6 +57,13 @@ app.post('/api/users/register', (req, res) => {
 })
 
 // 로그인 기능
+
+// 수정된부분 by uijin
+app.get('/login', (req, res) => {
+    res.render('./account/login');
+})
+///////////////////////////////////
+
 app.post('/api/users/login', (req, res) => {
     // 요청된 아이디를 데이터베이스에서 있는지 찾는다.
     User.findOne({ id: req.body.id, isDeleted: false }, (err, user) => {
@@ -99,6 +114,38 @@ app.get('/api/users/logout', auth, (req, res) => {
 })
 
 ////////////////////// BOARD //////////////////////
+
+///// 개시물 조회 수정부분
+// 수정된부분 by uijin
+app.get('/readBoard', async (req, res) => {
+    let boardId = req.query.boardId;
+    try {
+        const read = await Board.findOne({
+            where: {
+                boardId
+            }
+        });
+
+        const comment = await Comment.findAll({
+            where: {
+                boardId
+            },
+            order: [['commentDay', 'DESC']]
+        });
+
+        res.render('./basicBoard/readBoard', {
+            boardId,
+            readBoard: read,
+            commentBoard: comment
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+})
+
+////////////////
+
 
 // 게시물 생성 기능
 // 로그인 시 생성한 토큰을 쿠키에서 가져온 후 게시물 생성 > 게시물 작성하려면 로그인 필수
