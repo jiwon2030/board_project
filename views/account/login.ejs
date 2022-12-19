@@ -1,8 +1,8 @@
 <%- include ('../include/header') -%>
 
     <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">닉네임</span>
-        <input type="text" class="form-control" id="name" placeholder="닉네임을 입력해주세요." aria-label="Username"
+        <span class="input-group-text" id="basic-addon1">아이디</span>
+        <input type="text" class="form-control" id="name" placeholder="아이디를 입력해주세요." aria-label="Username"
             aria-describedby="basic-addon1">
     </div>
 
@@ -19,20 +19,20 @@
 
         <script>
             function login() {
-                let name = document.getElementById('name').value;
+                let id = document.getElementById('id').value;
                 let password = document.getElementById('password').value;
 
                 var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
                 var myWrongModal = new bootstrap.Modal(document.getElementById("wrongModal"), {});
                 var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
 
-                if (name == '' || password == '') {
+                if (id == '' || password == '') {
                     myChkValModal.show();
 
                 } else {
 
                     const data = {
-                        name: name,
+                        id: id,
                         password: password
                     }
                     const url = '/accountAPI/login';
@@ -70,11 +70,8 @@
                             }
 
                             myModal.show();
-                        }
-                        )
+                        })
                 }
-
-
             }
 
         </script>

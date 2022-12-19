@@ -1,121 +1,56 @@
 const express = require('express');
-const joi = require('joi')
 const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
-const { Account } = require('../../models');
+const bcrypt = require('bcrypt');
+const { User } = require("./models/user");
 const router = express.Router();
 
-
-const chkAccountSchema = joi.object({
-    name: joi.string()
-        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-        .required(),
-    password: joi.string()
-        .min(4)
-        .required(),
-    chkPassword: joi.string()
-        .min(4)
-        .required()
-})
-
-
 router.post('/signUp', async (req, res) => {
-    try {
-        const { name, password, chkPassword } = await chkAccountSchema.validateAsync(req.body);
-        const idReg2 = /^[a-zA-Z]+$/.test(name);
-        const idReg3 = /^\d+$/.test(name);
+    // 회원가입할 때 필요한 정보들을 client에서 가져오면 데이터 베이스에 넣어준다.
+    const user = new User(req.body) // req.body에 id나 password같은 정보가 들어간다.
 
-        if (password != chkPassword) {
-            return res.status(400).send({
-                result: "fail",
-                status: 400,
-                modal_title: "회원가입 실패",
-                modal_body: "비밀번호 확인은 비밀번호와 정확하게 일치해야 합니다."
-            });
-        }
-
-        if (password.indexOf(name) != -1) {
-            return res.status(400).send({
-                result: "fail",
-                status: 400,
-                modal_title: "회원가입 실패",
-                modal_body: "비밀번호는 최소 4자 이상이며, 비밀번호에 닉네임과 같은 값이 포함되면 안됩니다."
-            });
-        }
-
-        if (idReg2 || idReg3) {
-            return res.status(400).send({
-                result: "fail",
-                status: 400,
-                modal_title: "회원가입 실패",
-                modal_body: "닉네임은 최소 3자 이상이며, 알파벳 대소문자(a~z, A~Z) 및 숫자(0~9)의 혼합으로 이루어져야 합니다."
-            });
-        }
-
-
-        const user = await Account.findOne({
-            where: { name }
+    user.save((err, userInfo) => {
+        if(err) return res.json({ success: false, err })
+        // 성공했다는 정보를 모달창으로 띄우기
+        return res.status(200).send({
+            success: true,
+            modal_title: "회원가입 성공",
+            modal_body: "회원이 되신것을 축하드립니다!"
         })
-
-        console.log(user)
-        if (user != null) {
-            res.status(400).send({
-                result: "fail",
-                status: 400,
-                modal_title: "회원가입 실패",
-                modal_body: "중복된 닉네임입니다."
-            });
-
-        } else {
-            await Account.create({ name, password });
-            res.status(200).send({
-                result: "success",
-                status: 200,
-                modal_title: "회원가입 성공",
-                modal_body: "회원이 되신것을 축하드립니다!"
-            });
-        }
-    } catch (err) {
-        res.status(400).send({
-            result: "fail",
-            status: 400,
-            modal_title: "회원가입 실패",
-            modal_body: "양식에 맞지 않습니다."
-        });
-    }
-
+    })
 })
-
 
 router.post('/login', async (req, res) => {
-    const { name, password } = req.body;
+    // 요청된 아이디를 데이터베이스에서 있는지 찾는다.
+    User.findOne({ id: req.body.id, isDeleted: false }, (err, user) => {
+        if(!user) {
+            return res.send({
+                loginSuccess: false,
+                modal_title: "로그인 실패",
+                modal_body: "존재하지 않은 아이디입니다."
+            })
+        }
 
-    const user = await Account.findOne({
-        where: { name, password }
+        // 요청된 아이디가 데이터 베이스에 있다면 비밀번호가 맞는 비밀번호인지 확인한다.
+        user.comparePassword(req.body.password, (err, isMatch) => {
+            if(err) return res.status(400).send(err);
+            if(!isMatch)
+                return res.send({ 
+                    loginSuccess: false, 
+                    modal_title: "비밀번호 오류",
+                    modal_body: "비밀번호가 틀렸습니다. 다시 입력해주세요" 
+                })
+            
+            // 비밀번호까지 일치한다면 토큰을 생성한다.
+            user.generateToken((err, user) => {
+                if(err) return res.status(400).send(err) // error가 있다는 것을 client에 전달해준다.
+                // 토큰을 쿠키에 저장한다.
+                res.cookie("x_auth", user.token)
+                    .status(200)
+                    .json({ loginSuccess: true, userId: user._id }) 
+
+            })
+        })
     })
-
-    if (!user) {
-        res.status(400).send({
-            result: "fail",
-            status: 400,
-            modal_title: "로그인 실패",
-            modal_body: "닉네임 또는 패스워드를 확인해주세요."
-        });
-
-    } else {
-        const token = jwt.sign({ name: user.name }, "DongGyunKey");
-
-        res.status(200).send({
-            token: token,
-            status: 200,
-            result: "success",
-            modal_title: "로그인 성공",
-            modal_body: name + "님 환영합니다."
-        });
-    }
-
-
 })
-
 
 module.exports = router;
