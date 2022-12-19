@@ -1,0 +1,83 @@
+<%- include ('../include/header') -%>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">닉네임</span>
+        <input type="text" class="form-control" id="name" placeholder="닉네임을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">비밀번호</span>
+        <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="login()">로그인</button>
+    <button type="button" class="btn btn-success" onclick="location.href='/signUp'">회원가입</button>
+
+    <%- include ('../include/modal') -%>
+
+        <script>
+            function login() {
+                let name = document.getElementById('name').value;
+                let password = document.getElementById('password').value;
+
+                var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
+                var myWrongModal = new bootstrap.Modal(document.getElementById("wrongModal"), {});
+                var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
+
+                if (name == '' || password == '') {
+                    myChkValModal.show();
+
+                } else {
+
+                    const data = {
+                        name: name,
+                        password: password
+                    }
+                    const url = '/accountAPI/login';
+                    const init = {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin'
+                    };
+
+                    fetch(url, init)
+                        .then((res) => res.json())
+                        .then(res => {
+                            responseTxt = res;
+
+                            const modalTitle = document.querySelector('#msgTitle');
+                            var mtTxt = document.createTextNode(responseTxt['modal_title']);
+                            modalTitle.appendChild(mtTxt);
+
+                            const modalBody = document.querySelector('#msgbody');
+                            var mbTxt = document.createTextNode(responseTxt['modal_body']);
+                            modalBody.appendChild(mbTxt);
+
+                            if (res.status === 200 || res.status === 201) {
+                                document.getElementById('exitButton').setAttribute('onclick', 'window.location.href="/"');
+                                document.getElementById('correctButton').setAttribute('onclick', 'window.location.href="/"');
+                                localStorage.setItem("token", responseTxt['token']);
+
+                            } else {
+                                document.getElementById('exitButton').setAttribute('onclick', "closeOneModal('noticeModal')");
+                                document.getElementById('correctButton').setAttribute('onclick', "closeOneModal('noticeModal')");
+
+                            }
+
+                            myModal.show();
+                        }
+                        )
+                }
+
+
+            }
+
+        </script>
+
+
+        <%- include ('../include/footer') -%>

@@ -36,7 +36,7 @@
             function make_button() {
                 let name = document.getElementById('name').value
                 let token = parseJwt(localStorage.getItem("token"))['name'];
-                if (localStorage.getItem('token') != null && nickname == token) {
+                if (localStorage.getItem('token') != null && name == token) {
                     var btn_upd = document.createElement('button');
                     var btn_del = document.createElement('button');
                     var read = document.getElementById('readDiv');
