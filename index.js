@@ -1,19 +1,24 @@
 const express = require('express') // express 모듈 가져오기
 const app = express()
 const port = 8000 // 포트번호 8000번으로 설정
+
+
 const bodyParser = require('body-parser') // express에서 제공되는 bodyParser 모듈
 const cookieParser = require('cookie-parser') // express에서 제공되는 cookieParser 모듈
+
+
 const { User } = require("./models/user")
 const { Board } = require("./models/board")
 const { auth } = require('./middleware/auth')
 
 const config = require('./config/dev')
 
-//app.set('views', __dirname + '/views');
 app.set('view engine','ejs');
 app.set('views', './views/board');
 
+/////////////////////////////
 
+////////////////////////////
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
 // App에 MongoDB 연결하기
 mongoose.connect(config.mongoURI, {
@@ -26,6 +31,7 @@ app.use(bodyParser.urlencoded({extended: true})) // application/x-www-form-urlen
 app.use(bodyParser.json()) // application/json으로 되어 있는 정보를 분석
 app.use(cookieParser()) 
 
+// 게시판 get요청
 app.get('/', async (req, res) => {
     const board = await Board.find({
         order: [['day', 'DESC']]   
@@ -39,7 +45,7 @@ app.get('/', async (req, res) => {
 // 회원가입 기능
 // 수정된부분 by uijin
 app.get('/signUp', (req, res) => {
-    res.render('./account/signUP');
+    res.render('../acount/signUP'); //경로수정으로 회원가입 페이지 접근 해결
 })
 ////////////////////////////////////
 
@@ -60,7 +66,7 @@ app.post('/api/users/register', (req, res) => {
 
 // 수정된부분 by uijin
 app.get('/login', (req, res) => {
-    res.render('./account/login');
+    res.render('../account/login'); //로그인 페이지 접근해결
 })
 ///////////////////////////////////
 
