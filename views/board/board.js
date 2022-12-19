@@ -118,7 +118,7 @@ router.post('/chkPW', auth, async (req, res) => {
     }
 })
 
-// boardUpdate에서 수정하기 혹은 삭제하기 
+// boardUpdate에서 수정하기 혹은 삭제하기
 router.post('/boardUpdate', async (req, res) => {
     try {
         const { boardId, title, contents, nowButton } = req.body;
