@@ -15,7 +15,7 @@ services:
     container_name: web
     restart: unless-stopped
     build:
-      context: .
+      context: ./web
     volumes:
       - ./web_dir/:/web/
       - build_folder:/web/build
