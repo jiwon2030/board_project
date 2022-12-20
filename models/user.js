@@ -76,7 +76,7 @@ userSchema.methods.generateToken = function(cb) {
     var token = jwt.sign(user._id.toHexString(), 'secretToken')
 
     user.token = token
-    user.final_login_date = CurrentTime.getCurrentDate();
+    user.updatedAt = CurrentTime.getCurrentDate();
 
     user.save(function(err, user) {
         if(err) return cb(err)

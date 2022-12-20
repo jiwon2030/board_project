@@ -47,15 +47,15 @@ router.post('/boardCreate', auth, async (req, res) => {
     }
 })
 
-// readBoard에서 수정하기 혹은 삭제하기 
+// boardRead에서 수정하기 혹은 삭제하기 
 router.post('/chkPW', auth, async (req, res) => {
     try {
         const { boardId, passWord, nowButton } = req.body;
         const { user } = res.locals;
-        const name = user['dataValues']['name'];
+        const id = user['dataValues']['id'];
 
-        User.hasMany(Board, { foreignKey: 'name' });
-        Board.belongsTo(User, { foreignKey: 'name' });
+        User.hasMany(Board, { foreignKey: 'id' });
+        Board.belongsTo(User, { foreignKey: 'id' });
 
         const findIdPw = await Board.findOne({
             include: [
@@ -63,7 +63,7 @@ router.post('/chkPW', auth, async (req, res) => {
                     model: User,
                     required: true,
                     where: {
-                        _id, passWord
+                        id, passWord
                     }
                 }
             ],
@@ -80,12 +80,6 @@ router.post('/chkPW', auth, async (req, res) => {
                     status: 200
                 });
             } else {
-
-                await Comment.destroy({
-                    where: {
-                        boardId
-                    }
-                });
 
                 await Board.destroy({
                     where: {
@@ -151,12 +145,6 @@ router.post('/boardUpdate', async (req, res) => {
                 });
 
             } else {
-                await Comment.destroy({
-                    where: {
-                        boardId
-                    }
-                });
-
                 await Board.destroy({
                     where: {
                         boardId

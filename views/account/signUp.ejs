@@ -1,20 +1,14 @@
 <%- include ('../include/header') -%>
 
     <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">닉네임</span>
-        <input type="text" class="form-control" id="name" placeholder="최소 3자 이상, 알파벳 대소문자와 숫자의 혼합으로 이루어져야 합니다."
+        <span class="input-group-text" id="basic-addon1">아이디</span>
+        <input type="text" class="form-control" id="id" placeholder="아이디를 입력해주세요."
             aria-label="Username" aria-describedby="basic-addon1">
     </div>
 
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">비밀번호</span>
-        <input type="password" class="form-control" id="password" placeholder="최소 4자 이상, 닉네임과 같은 값이 포함되면 안됩니다."
-            aria-label="Username" aria-describedby="basic-addon1">
-    </div>
-
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">비밀번호 확인</span>
-        <input type="password" class="form-control" id="chkPassword" placeholder="같은 비밀번호를 입력해주세요."
+        <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력해주세요."
             aria-label="Username" aria-describedby="basic-addon1">
     </div>
 
@@ -25,22 +19,19 @@
         <script>
             // 회원 가입
             function chkSignUp() {
-                let name = document.getElementById('name').value;
+                let id = document.getElementById('id').value;
                 let password = document.getElementById('password').value;
-                let chkPassword = document.getElementById('chkPassword').value;
 
                 var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
                 var myWrongModal = new bootstrap.Modal(document.getElementById("wrongModal"), {});
-                var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
 
 
                 const data = {
-                    name: name,
+                    id: id,
                     password: password,
-                    chkPassword: chkPassword
                 }
 
-                if (name == '' || password == '' || chkPassword == '') {
+                if (id == '' || password == '') {
                     myChkValModal.show();
 
                 } else {

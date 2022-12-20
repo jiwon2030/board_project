@@ -16,9 +16,6 @@ const config = require('./config/dev')
 app.set('view engine','ejs');
 app.set('views', './views/board');
 
-/////////////////////////////
-
-////////////////////////////
 const mongoose = require('mongoose') // mongoose 모듈 가져오기
 // App에 MongoDB 연결하기
 mongoose.connect(config.mongoURI, {
@@ -123,7 +120,7 @@ app.get('/api/users/logout', auth, (req, res) => {
 
 ///// 개시물 조회 수정부분
 // 수정된부분 by uijin
-app.get('/readBoard', async (req, res) => {
+app.get('/boardRead', async (req, res) => {
     let boardId = req.query.boardId;
     try {
         const read = await Board.findOne({
@@ -132,17 +129,9 @@ app.get('/readBoard', async (req, res) => {
             }
         });
 
-        const comment = await Comment.findAll({
-            where: {
-                boardId
-            },
-            order: [['commentDay', 'DESC']]
-        });
-
-        res.render('./basicBoard/readBoard', {
+        res.render('../board/boardRead', {
             boardId,
-            readBoard: read,
-            commentBoard: comment
+            boardRead: read,
         });
     } catch (err) {
         console.error(err);
