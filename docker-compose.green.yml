@@ -12,10 +12,12 @@ services:
       - 27017:27017
 
   web-services: #현재 프론트,백앤드기능이 같은파일에 합쳐져있음 
-    container_name: web
+    container_name: web-green
     restart: unless-stopped
     build:
       context: ./web
+    ports:
+      - 8081:8000
     volumes:
       - ./web_dir/:/web/
       - build_folder:/web/build
