@@ -6,9 +6,11 @@
 -----------------------------------------
 
 ## install
+```c
 cd “YOUR_DOWNLOAD_LOCATION”
 
 git clone --recursive https://github.com/jiwon2030/board_project.git
+```
 
 ## insert into /web/config File (dev.js)
 ```c
