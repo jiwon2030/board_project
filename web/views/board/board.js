@@ -46,7 +46,6 @@ router.get("/api/boards", async (req, res) => {
 
 // boardRead에서 수정하기 혹은 삭제하기 
 // 게시물 업로드한 본인만 수정 가능 > 로그인 해야함
-// @json : title, content
 router.patch("/boardUpdate", auth, (req, res) => {
     Board.findOneAndUpdate({ _id: req.params.id, userId:req.user._id, isDeleted: false }, { title: req.body.title, content: req.body.content, updatedAt: new Date() }, (err, board) => {
         if (err) 
