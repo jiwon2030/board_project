@@ -1,0 +1,61 @@
+<%- include ('../include/header') -%>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">제목</span>
+        <input type="text" id='title' class="form-control" placeholder="제목을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">내용</span>
+        <input type="text" id='contents' class="form-control" placeholder="내용을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
+    </div>
+
+
+    <button type="button" class="btn btn-info" onclick="save_blog()">글쓰기</button>
+
+    <%- include ('../include/modal') -%>
+
+
+
+        <script>
+            // 글쓰기 저장
+            function save_blog() {
+                var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
+                var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
+                let title = document.getElementById('title').value;
+                let contents = document.getElementById('contents').value;
+                const data = {
+                    title: title,
+                    contents: contents
+                };
+                if (title != '' || contents != '') {
+                    const url = '/api/boardCreate';
+                    const init = {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'authorization': 'Bearer ' + localStorage.getItem("token"),
+                        },
+                        credentials: 'same-origin'
+                    };
+                    fetch(url, init)
+                        .then((res) => res.json())
+                        .then(res => {
+                            responseTxt = res
+                            if (res.status == 200 || res.status == 201) {
+                                const modalTitle = document.querySelector('#msgTitle');
+                                var mtTxt = document.createTextNode(responseTxt['modal_title']);
+                                modalTitle.appendChild(mtTxt);
+                                const modalBody = document.querySelector('#msgbody');
+                                var mbTxt = document.createTextNode(responseTxt['modal_body']);
+                                modalBody.appendChild(mbTxt);
+                                myModal.show();
+                            }
+                        })
+                } else {
+                    myChkValModal.show();
+                }
+            }
+        </script>
+        <%- include ('../include/footer') -%>
