@@ -24,3 +24,8 @@ module.exports = {
 ```c
 npm install
 ```
+
+웹 동작 확인
+--------------------------------
+현재 디렉토리서 web디렉토리로 이동필요
+cd board_project/web/
